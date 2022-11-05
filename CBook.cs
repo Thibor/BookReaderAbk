@@ -9,13 +9,13 @@ namespace BookReaderAbk
 {
 	class CHeader
 	{
-		public int header;
+		public uint header;
 		public int bytesInHeader;
 		public int bytesPerMove;
 		public byte commentLength;
-		public char[] comment = new char[120];
+		public byte[] comment = new byte[120];
 		public byte authorLength;
-		public char[] author = new char[80];
+		public byte[] author = new byte[80];
 		public int depth;
 		public int moves;
 		public int minGames;
@@ -28,15 +28,43 @@ namespace BookReaderAbk
 		public int halfMoves;
 		public byte[] filter = new byte[24946];
 
+		public void Clear()
+		{
+			header = 0x0341424b;
+			bytesInHeader = 25200;
+			bytesPerMove = 28;
+			commentLength = 0;
+			Array.Clear(comment, 0, comment.Length);
+			authorLength = 0;
+			Array.Clear(author, 0, author.Length);
+			depth = 25;
+			moves = 0;
+			minGames = 1;
+			proWinWhite = 0;
+			proWinBlack = 0;
+			probabilityPriority = 15;
+			probabilityGames = 15;
+			probabilityWin = 15;
+			halfMoves = 25;
+			for (int n = 0; n < filter.Length; n++)
+				filter[n] = 0x78;
+		}
+
+		public void Fill()
+		{
+			Clear();
+			moves = Program.book.Count;
+		}
+
 		public void LoadFromBinaryReader(BinaryReader br)
 		{
-			header = br.ReadInt32();
+			header = br.ReadUInt32();
 			bytesInHeader = br.ReadInt32();
 			bytesPerMove = br.ReadInt32();
 			commentLength = br.ReadByte();
-			comment = br.ReadChars(comment.Length);
+			comment = br.ReadBytes(comment.Length);
 			authorLength = br.ReadByte();
-			author = br.ReadChars(author.Length);
+			author = br.ReadBytes(author.Length);
 			depth = br.ReadInt32();
 			moves = br.ReadInt32();
 			minGames = br.ReadInt32();
@@ -50,11 +78,33 @@ namespace BookReaderAbk
 			filter = br.ReadBytes(filter.Length);
 		}
 
+		public void SaveToBinaryWriter(BinaryWriter bw)
+		{
+			bw.Write(header);
+			bw.Write(bytesInHeader);
+			bw.Write(bytesPerMove);
+			bw.Write(commentLength);
+			bw.Write(comment);
+			bw.Write(authorLength);
+			bw.Write(author);
+			bw.Write(depth);
+			bw.Write(moves);
+			bw.Write(minGames);
+			bw.Write(minWin);
+			bw.Write(proWinWhite);
+			bw.Write(proWinBlack);
+			bw.Write(probabilityPriority);
+			bw.Write(probabilityGames);
+			bw.Write(probabilityWin);
+			bw.Write(halfMoves);
+			bw.Write(filter);
+		}
+
 		public string Author()
 		{
 			string result = String.Empty;
 			for (int n = 0; n < authorLength; n++)
-				result += author[n];
+				result += (char)author[n];
 			return result;
 		}
 
@@ -62,7 +112,7 @@ namespace BookReaderAbk
 		{
 			string result = String.Empty;
 			for (int n = 0; n < commentLength; n++)
-				result += comment[n];
+				result += (char)comment[n];
 			return result;
 		}
 
@@ -95,6 +145,20 @@ namespace BookReaderAbk
 			ply = br.ReadInt32();
 			nextMove = br.ReadInt32();
 			nextSibling = br.ReadInt32();
+		}
+
+		public void SaveToBinaryWriter(BinaryWriter bw)
+		{
+			bw.Write(fr);
+			bw.Write(to);
+			bw.Write(promotion);
+			bw.Write(priority);
+			bw.Write(games);
+			bw.Write(win);
+			bw.Write(loose);
+			bw.Write(ply);
+			bw.Write(nextMove);
+			bw.Write(nextSibling);
 		}
 
 		string SquareToStr(byte square)
@@ -223,6 +287,17 @@ namespace BookReaderAbk
 				}
 			}
 			return true;
+		}
+
+		public void SaveToFile(string path)
+		{
+			using (FileStream fs = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
+			using (BinaryWriter writer = new BinaryWriter(fs))
+			{
+				header.SaveToBinaryWriter(writer);
+				foreach (CRec rec in this)
+					rec.SaveToBinaryWriter(writer);
+			}
 		}
 
 	}
