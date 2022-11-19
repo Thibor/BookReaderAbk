@@ -199,7 +199,7 @@ namespace BookReaderAbk
 		public const string name = "BookReaderAbk";
 		public const string version = "2022-11-04";
 		public static Random rnd = new Random();
-		readonly CHeader header = new CHeader();
+		public CHeader header = new CHeader();
 
 		public CRec GetRec(int position)
 		{
@@ -289,15 +289,17 @@ namespace BookReaderAbk
 			return true;
 		}
 
-		public void SaveToFile(string path)
+		public bool SaveToFile(string path)
 		{
 			using (FileStream fs = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
 			using (BinaryWriter writer = new BinaryWriter(fs))
 			{
+				header.moves = Count;
 				header.SaveToBinaryWriter(writer);
 				foreach (CRec rec in this)
 					rec.SaveToBinaryWriter(writer);
 			}
+			return true;
 		}
 
 	}

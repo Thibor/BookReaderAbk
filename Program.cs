@@ -56,7 +56,7 @@ namespace BookReaderAbk
 			string engineArguments = String.Join(" ", listEa);
 			bool bookLoaded = book.LoadFromFile(bookFile);
 			if (bookLoaded)
-				Console.WriteLine($"info string book on");
+				Console.WriteLine($"info string book on {book.Count:N0} moves");
 			Process engineProcess = null;
 			if (File.Exists(engineFile))
 			{
@@ -81,7 +81,20 @@ namespace BookReaderAbk
 					switch (uci.tokens[1])
 					{
 						case "header":
+							if (uci.tokens.Length > 2)
+							if (uci.tokens[2] == "clear")
+								book.header.Clear();
 							book.ShowHeader();
+							break;
+						case "load":
+							book.LoadFromFile(uci.GetValue(2, 0));
+							Console.WriteLine($"moves {book.Count:N0}");
+							break;
+						case "save":
+							if (book.SaveToFile(uci.GetValue(2, 0)))
+								Console.WriteLine("The book has been saved");
+							else
+								Console.WriteLine("Writing to the file has failed");
 							break;
 					}
 				}
