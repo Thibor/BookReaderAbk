@@ -17,6 +17,7 @@ namespace BookReaderAbk
 
 		static void Main(string[] args)
 		{
+			bool isInfo = false;
 			int emptyTotal = 0;
 			string lastFen = String.Empty;
 			string lastMoves = String.Empty;
@@ -34,6 +35,10 @@ namespace BookReaderAbk
 					case "-ef"://engine file
 					case "-ea"://engine arguments
 						ax = ac;
+						break;
+					case "-info":
+						ax = ac;
+						isInfo = true;
 						break;
 					default:
 						switch (ax)
@@ -56,7 +61,7 @@ namespace BookReaderAbk
 			string engineArguments = String.Join(" ", listEa);
 			bool bookLoaded = book.LoadFromFile(bookFile);
 			if (bookLoaded)
-				Console.WriteLine($"info string book on {book.Count:N0} moves");
+				Console.WriteLine($"info string book on {book.Count:N0} moves 224 bpm");
 			Process engineProcess = null;
 			if (File.Exists(engineFile))
 			{
@@ -71,7 +76,8 @@ namespace BookReaderAbk
 			}
 			else if (engineFile != String.Empty)
 				Console.WriteLine($"info string missing engine  [{engineFile}]");
-
+			if (isInfo)
+				book.ShowInfo();
 			do
 			{
 				string msg = Console.ReadLine().Trim();
@@ -95,6 +101,9 @@ namespace BookReaderAbk
 								Console.WriteLine("The book has been saved");
 							else
 								Console.WriteLine("Writing to the file has failed");
+							break;
+						case "moves":
+							book.InfoMoves(uci.GetValue(2, 0));
 							break;
 					}
 				}

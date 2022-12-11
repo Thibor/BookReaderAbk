@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NSChess;
 
 namespace BookReaderAbk
 {
@@ -118,88 +119,13 @@ namespace BookReaderAbk
 
 	}
 
-	class CRec
-	{
-		public byte fr;
-		public byte to;
-		public byte promotion;
-		public byte priority;
-		public int games;
-		public int win;
-		public int loose;
-		public int ply;
-		public int nextMove;
-		public int nextSibling;
-
-		public long position;
-
-		public void LoadFromBinaryReader(BinaryReader br)
-		{
-			fr = br.ReadByte();
-			to = br.ReadByte();
-			promotion = br.ReadByte();
-			priority = br.ReadByte();
-			games = br.ReadInt32();
-			win = br.ReadInt32();
-			loose = br.ReadInt32();
-			ply = br.ReadInt32();
-			nextMove = br.ReadInt32();
-			nextSibling = br.ReadInt32();
-		}
-
-		public void SaveToBinaryWriter(BinaryWriter bw)
-		{
-			bw.Write(fr);
-			bw.Write(to);
-			bw.Write(promotion);
-			bw.Write(priority);
-			bw.Write(games);
-			bw.Write(win);
-			bw.Write(loose);
-			bw.Write(ply);
-			bw.Write(nextMove);
-			bw.Write(nextSibling);
-		}
-
-		string SquareToStr(byte square)
-		{
-			int y = square >> 3;
-			int x = square & 7;
-			string file = "abcdefgh";
-			string rank = "12345678";
-			return $"{file[x]}{rank[y]}";
-		}
-
-		string PromotionToStr(byte p)
-		{
-			switch (p)
-			{
-				case 1:
-					return "r";
-				case 2:
-					return "n";
-				case 3:
-					return "b";
-				case 4:
-					return "q";
-				default:
-					return String.Empty;
-			}
-		}
-
-		public string GetUci()
-		{
-			return SquareToStr(fr) + SquareToStr(to) + PromotionToStr(promotion);
-		}
-
-	}
-
 	internal class CBook : List<CRec>
 	{
 		public const string name = "BookReaderAbk";
 		public const string version = "2022-11-04";
 		public static Random rnd = new Random();
 		public CHeader header = new CHeader();
+		readonly CChess chess = new CChess();
 
 		public CRec GetRec(int position)
 		{
@@ -219,9 +145,9 @@ namespace BookReaderAbk
 			return GetRec(rec, umo);
 		}
 
-		public List<CRec> GetSiblings(CRec rec)
+		public CRecList GetSiblings(CRec rec)
 		{
-			List<CRec> list = new List<CRec>();
+			CRecList list = new CRecList();
 			while (rec != null)
 			{
 				list.Add(rec);
@@ -247,23 +173,28 @@ namespace BookReaderAbk
 			Console.WriteLine($"comment {header.Comment()}");
 		}
 
-		public string GetMove(string moves, CRec rec = null)
+		CRecList GetMoves(string moves)
 		{
+			CRecList list = new CRecList();
 			if (Count == 0)
-				return String.Empty;
-			if (rec == null)
-				rec = this[0];
+				return list;
+			CRec rec = this[0];
 			string[] am = moves.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 			foreach (string m in am)
 			{
 				rec = GetRec(rec, m);
 				if (rec == null)
-					return String.Empty;
+					return list;
 				rec = GetRec(rec.nextMove * 28);
 				if (rec == null)
-					return String.Empty;
+					return list;
 			}
-			List<CRec> list = GetSiblings(rec);
+			return GetSiblings(rec);
+		}
+
+		public string GetMove(string moves)
+		{
+			CRecList list = GetMoves(moves);
 			if (list.Count == 0)
 				return String.Empty;
 			return list[rnd.Next(list.Count)].GetUci();
@@ -300,6 +231,34 @@ namespace BookReaderAbk
 					rec.SaveToBinaryWriter(writer);
 			}
 			return true;
+		}
+
+		public void InfoMoves(string moves = "")
+		{
+			chess.SetFen();
+			if (!chess.MakeMoves(moves))
+				Console.WriteLine("wrong moves");
+			else
+			{
+				CRecList rl = GetMoves(moves);
+				if (rl.Count == 0)
+					Console.WriteLine("no moves found");
+				else
+				{
+					Console.WriteLine("id move  games   win loose");
+					Console.WriteLine();
+					int i = 1;
+					foreach (CRec r in rl)
+					{
+						Console.WriteLine(String.Format("{0,2} {1,-4} {2,6} {3,5} {4,5}", i++, r.GetUci(), r.games, r.win,r.loose));
+					}
+				}
+			}
+		}
+
+		public void ShowInfo()
+		{
+			InfoMoves();
 		}
 
 	}
