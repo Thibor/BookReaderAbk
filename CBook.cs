@@ -54,7 +54,7 @@ namespace BookReaderAbk
 		public void Fill()
 		{
 			Clear();
-			moves = Program.book.Count;
+			moves = Program.book.recList.Count;
 		}
 
 		public void LoadFromBinaryReader(BinaryReader br)
@@ -119,17 +119,24 @@ namespace BookReaderAbk
 
 	}
 
-	internal class CBook : List<CRec>
+	internal class CBook
 	{
 		public const string name = "BookReaderAbk";
 		public const string version = "2022-11-04";
 		public static Random rnd = new Random();
 		public CHeader header = new CHeader();
+		public CRecList recList = new CRecList();
 		readonly CChess chess = new CChess();
+
+		public void Clear()
+		{
+			header.Clear();
+			recList.Clear();
+		}
 
 		public CRec GetRec(int position)
 		{
-			foreach (CRec rec in this)
+			foreach (CRec rec in recList)
 				if (rec.position == position)
 					return rec;
 			return null;
@@ -176,9 +183,9 @@ namespace BookReaderAbk
 		CRecList GetMoves(string moves)
 		{
 			CRecList list = new CRecList();
-			if (Count == 0)
+			if (recList.Count == 0)
 				return list;
-			CRec rec = this[0];
+			CRec rec = recList[0];
 			string[] am = moves.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 			foreach (string m in am)
 			{
@@ -192,12 +199,23 @@ namespace BookReaderAbk
 			return GetSiblings(rec);
 		}
 
+		string GetMove(CRecList rl)
+		{
+			string move = String.Empty;
+			int w = 0;
+			foreach (CRec r in rl)
+			{
+				w += r.games;
+				if (CChess.rnd.Next(w) < r.games)
+					move = r.GetUci();
+			}
+			return move;
+		}
+
 		public string GetMove(string moves)
 		{
 			CRecList list = GetMoves(moves);
-			if (list.Count == 0)
-				return String.Empty;
-			return list[rnd.Next(list.Count)].GetUci();
+			return GetMove(list);
 		}
 
 		public bool LoadFromFile(string path)
@@ -214,7 +232,7 @@ namespace BookReaderAbk
 					CRec rec = new CRec();
 					rec.position = reader.BaseStream.Position;
 					rec.LoadFromBinaryReader(reader);
-					Add(rec);
+					recList.Add(rec);
 				}
 			}
 			return true;
@@ -225,9 +243,9 @@ namespace BookReaderAbk
 			using (FileStream fs = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
 			using (BinaryWriter writer = new BinaryWriter(fs))
 			{
-				header.moves = Count;
+				header.moves = recList.Count;
 				header.SaveToBinaryWriter(writer);
-				foreach (CRec rec in this)
+				foreach (CRec rec in recList)
 					rec.SaveToBinaryWriter(writer);
 			}
 			return true;
@@ -245,6 +263,7 @@ namespace BookReaderAbk
 					Console.WriteLine("no moves found");
 				else
 				{
+					rl.SortGames();
 					Console.WriteLine("id move  games   win loose");
 					Console.WriteLine();
 					int i = 1;

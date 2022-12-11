@@ -82,5 +82,13 @@ namespace BookReaderAbk
 
 	internal class CRecList:List<CRec>
 	{
+		public void SortGames()
+		{
+			Sort(delegate (CRec r1, CRec r2)
+			{
+				return r2.games - r1.games;
+			});
+		}
+
 	}
 }

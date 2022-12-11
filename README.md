@@ -8,6 +8,17 @@ To use this program you need install  <a href="https://dotnet.microsoft.com/down
 **-bf** chess opening Book File name<br/>
 **-ef** chess Engine File name<br/>
 **-ea** chess Engine Arguments<br/>
+**-info** show additional INFOrmation<br/>
+
+## Console commands
+
+**book load** [filename].[abk] - clear and add<br/>
+**book save** [filename].[abk] - save book to the file<br/>
+**book clear** - clear all moves from the book<br/>
+**book moves** [uci] - make sequence of moves in uci format and shows possible continuations<br/>
+**book header** - show header of current book<br/>
+**book info** - show additional information<br/>
+**quit** quit the program as soon as possible
 
 ### Examples
 
