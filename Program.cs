@@ -78,7 +78,7 @@ namespace BookReaderAbk
 			{
 				string msg = Console.ReadLine().Trim();
 				uci.SetMsg(msg);
-				if (uci.First() == "book")
+				if (uci.command == "book")
 				{
 					switch (uci.tokens[1])
 					{
@@ -118,9 +118,9 @@ namespace BookReaderAbk
 							break;
 					}
 				}
-				if ((uci.First() != "go") && (engineProcess != null))
+				if ((uci.command != "go") && (engineProcess != null))
 					engineProcess.StandardInput.WriteLine(msg);
-				switch (uci.First())
+				switch (uci.command)
 				{
 					case "ucinewgame":
 						emptyTotal = 0;
@@ -145,7 +145,7 @@ namespace BookReaderAbk
 						}
 						break;
 				}
-			} while (uci.First() != "quit");
+			} while (uci.command != "quit");
 		}
 	}
 }
