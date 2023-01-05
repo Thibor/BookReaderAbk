@@ -123,6 +123,7 @@ namespace BookReaderAbk
 	{
 		public const string name = "BookReaderAbk";
 		public const string version = "2022-11-04";
+		public const string defExt = ".abk";
 		public static Random rnd = new Random();
 		public CHeader header = new CHeader();
 		public CRecList recList = new CRecList();
@@ -205,7 +206,7 @@ namespace BookReaderAbk
 			int w = 0;
 			foreach (CRec r in rl)
 			{
-				w += r.games;
+				w += r.games + 1;
 				if (CChess.rnd.Next(w) < r.games)
 					move = r.GetUci();
 			}

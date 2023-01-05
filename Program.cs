@@ -59,8 +59,7 @@ namespace BookReaderAbk
 			string bookFile = String.Join(" ", listBf);
 			string engineFile = String.Join(" ", listEf);
 			string engineArguments = String.Join(" ", listEa);
-			bool bookLoaded = book.LoadFromFile(bookFile);
-			if (bookLoaded)
+			if (book.LoadFromFile(bookFile))
 				Console.WriteLine($"info string book on {book.recList.Count:N0} moves 224 bpm");
 			Process engineProcess = null;
 			if (File.Exists(engineFile))
@@ -82,22 +81,21 @@ namespace BookReaderAbk
 			{
 				string msg = Console.ReadLine().Trim();
 				uci.SetMsg(msg);
-				if (uci.command == "book")
+				if (uci.First() == "book")
 				{
 					switch (uci.tokens[1])
 					{
 						case "header":
-							if (uci.tokens.Length > 2)
-							if (uci.tokens[2] == "clear")
+							if (uci.GetIndex("clear") > 0)
 								book.header.Clear();
 							book.ShowHeader();
 							break;
 						case "load":
-							book.LoadFromFile(uci.GetValue(2, 0));
+							book.LoadFromFile(uci.GetValue("load"));
 							Console.WriteLine($"moves {book.recList.Count:N0}");
 							break;
 						case "save":
-							if (book.SaveToFile(uci.GetValue(2, 0)))
+							if (book.SaveToFile(uci.GetValue("save")))
 								Console.WriteLine("The book has been saved");
 							else
 								Console.WriteLine("Writing to the file has failed");
@@ -107,13 +105,25 @@ namespace BookReaderAbk
 							Console.WriteLine("Book is empty");
 							break;
 						case "moves":
-							book.InfoMoves(uci.GetValue(2, 0));
+							book.InfoMoves(uci.GetValue("moves"));
+							break;
+						case "getoption":
+							Console.WriteLine($"option name Book file type string default book{CBook.defExt}");
+							Console.WriteLine("optionok");
+							break;
+						case "setoption":
+							switch (uci.GetValue("name", "value").ToLower())
+							{
+								case "book file":
+									book.LoadFromFile(uci.GetValue("value"));
+									break;
+							}
 							break;
 					}
 				}
-				if ((uci.command != "go") && (engineProcess != null))
+				if ((uci.First() != "go") && (engineProcess != null))
 					engineProcess.StandardInput.WriteLine(msg);
-				switch (uci.command)
+				switch (uci.First())
 				{
 					case "ucinewgame":
 						emptyTotal = 0;
@@ -124,7 +134,7 @@ namespace BookReaderAbk
 						break;
 					case "go":
 						string move = String.Empty;
-						if((emptyTotal == 0) && String.IsNullOrEmpty(lastFen))
+						if ((emptyTotal == 0) && String.IsNullOrEmpty(lastFen))
 							move = book.GetMove(lastMoves);
 						if (!String.IsNullOrEmpty(move))
 							Console.WriteLine($"bestmove {move}");
@@ -138,7 +148,7 @@ namespace BookReaderAbk
 						}
 						break;
 				}
-			} while (uci.command != "quit");
+			} while (uci.First() != "quit");
 		}
 	}
 }

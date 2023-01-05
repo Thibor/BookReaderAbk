@@ -18,9 +18,11 @@ To use this program you need install  <a href="https://dotnet.microsoft.com/down
 **book moves** [uci] - make sequence of moves in uci format and shows possible continuations<br/>
 **book header** - show header of current book<br/>
 **book info** - show additional information<br/>
+**book getoption** - show options<br/>
+**book setoption name [option name] value [option value]** - set option<br/>
 **quit** quit the program as soon as possible
 
-### Examples
+### Parameters examples
 
 -bf book.abk -ef stockfish.exe<br/>
 book -ef stockfish.exe
