@@ -14,11 +14,11 @@ namespace BookReaderAbk
 
 		static void Main(string[] args)
 		{
+			bool isW = false;
 			bool isInfo = false;
 			int emptyTotal = 0;
 			string lastFen = String.Empty;
 			string lastMoves = String.Empty;
-			Console.WriteLine($"info string book {CBook.name} ver {CBook.version}");
 			string ax = "-bf";
 			List<string> listBf = new List<string>();
 			List<string> listEf = new List<string>();
@@ -56,8 +56,8 @@ namespace BookReaderAbk
 			string bookFile = String.Join(" ", listBf);
 			string engineFile = String.Join(" ", listEf);
 			string engineArguments = String.Join(" ", listEa);
-			if (book.LoadFromFile(bookFile))
-				Console.WriteLine($"info string book on {book.recList.Count:N0} moves 224 bpm");
+			Console.WriteLine($"info string {CBook.name} ver {CBook.version}");
+			bool bookLoaded = SetBookFile(bookFile);
 			Process engineProcess = null;
 			if (File.Exists(engineFile))
 			{
@@ -72,8 +72,6 @@ namespace BookReaderAbk
 			}
 			else if (engineFile != String.Empty)
 				Console.WriteLine($"info string missing engine  [{engineFile}]");
-			if (isInfo)
-				book.ShowInfo();
 			do
 			{
 				string msg = Console.ReadLine().Trim();
@@ -112,7 +110,7 @@ namespace BookReaderAbk
 							switch (uci.GetValue("name", "value").ToLower())
 							{
 								case "book file":
-									book.LoadFromFile(uci.GetValue("value"));
+									SetBookFile(uci.GetValue("value"));
 									break;
 							}
 							break;
@@ -146,6 +144,24 @@ namespace BookReaderAbk
 						break;
 				}
 			} while (uci.command != "quit");
+
+			bool SetBookFile(string bn)
+			{
+				bookFile = bn;
+				bookLoaded = book.LoadFromFile(bookFile);
+				if (bookLoaded)
+				{
+					if ((book.recList.Count > 0) && File.Exists(book.path))
+						Console.WriteLine($"info string book on {book.recList.Count:N0} moves 224 bpm");
+					if (isW)
+						Console.WriteLine($"info string write on");
+					if (isInfo)
+						book.ShowInfo();
+				}
+				else
+					isW = false;
+				return bookLoaded;
+			}
 		}
 	}
 }

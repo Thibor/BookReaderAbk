@@ -124,6 +124,7 @@ namespace BookReaderAbk
 		public const string name = "BookReaderAbk";
 		public const string version = "2022-11-04";
 		public const string defExt = ".abk";
+		public string path = string.Empty;
 		public static Random rnd = new Random();
 		public CHeader header = new CHeader();
 		public CRecList recList = new CRecList();
@@ -219,8 +220,9 @@ namespace BookReaderAbk
 			return GetMove(list);
 		}
 
-		public bool LoadFromFile(string path)
+		public bool LoadFromFile(string p)
 		{
+			path = p;
 			Clear();
 			if (!File.Exists(path))
 				return false;
@@ -239,7 +241,17 @@ namespace BookReaderAbk
 			return true;
 		}
 
-		public bool SaveToFile(string path)
+		public bool SaveToFile(string p)
+		{
+			string ext = Path.GetExtension(p).ToLower();
+			if (ext == defExt)
+				return SaveToAbk(p);
+			if (ext == ".uci")
+				return SaveToUci(p);
+			return false;
+		}
+
+		public bool SaveToAbk(string path)
 		{
 			using (FileStream fs = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
 			using (BinaryWriter writer = new BinaryWriter(fs))
@@ -250,6 +262,41 @@ namespace BookReaderAbk
 					rec.SaveToBinaryWriter(writer);
 			}
 			return true;
+		}
+
+		public bool SaveToUci(string p)
+		{
+			List<string> sl = GetGames();
+			FileStream fs = File.Open(p, FileMode.Create, FileAccess.Write, FileShare.None);
+			using (StreamWriter sw = new StreamWriter(fs))
+			{
+				foreach (String uci in sl)
+					sw.WriteLine(uci);
+			}
+			return true;
+		}
+
+		void GetGames(string moves,ref List<string> list)
+		{
+			CRecList rl = GetMoves(moves);
+			if (rl.Count == 0)
+			{
+				list.Add(moves);
+				Console.Write($"\rgame {list.Count}");
+			}
+			foreach (CRec rec in rl)
+				GetGames($"{moves} {rec.GetUci()}".Trim(),ref list);
+		}
+
+		List<string> GetGames()
+		{
+			List<string> sl = new List<string>();
+			GetGames("",ref sl);
+			Console.WriteLine();
+			Console.WriteLine("finish");
+			Console.Beep();
+			sl.Sort();
+			return sl;
 		}
 
 		public void InfoMoves(string moves = "")

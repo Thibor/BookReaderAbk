@@ -13,7 +13,7 @@ To use this program you need install  <a href="https://dotnet.microsoft.com/down
 ## Console commands
 
 **book load** [filename].[abk] - clear and add<br/>
-**book save** [filename].[abk] - save book to the file<br/>
+**book save** [filename].[abk|uci] - save book to the file<br/>
 **book clear** - clear all moves from the book<br/>
 **book moves** [uci] - make sequence of moves in uci format and shows possible continuations<br/>
 **book header** - show header of current book<br/>
