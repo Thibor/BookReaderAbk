@@ -104,7 +104,7 @@ namespace BookReaderAbk
 							break;
 						case "getoption":
 							Console.WriteLine($"option name Book file type string default book{CBook.defExt}");
-							Console.WriteLine("optionok");
+							Console.WriteLine("optionend");
 							break;
 						case "setoption":
 							switch (uci.GetValue("name", "value").ToLower())
