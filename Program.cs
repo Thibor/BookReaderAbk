@@ -16,7 +16,7 @@ namespace BookReaderAbk
 		{
 			bool isW = false;
 			bool isInfo = false;
-			int emptyTotal = 0;
+			bool trySearch = true;
 			string lastFen = String.Empty;
 			string lastMoves = String.Empty;
 			string ax = "-bf";
@@ -120,22 +120,23 @@ namespace BookReaderAbk
 					engineProcess.StandardInput.WriteLine(msg);
 				switch (uci.command)
 				{
-					case "ucinewgame":
-						emptyTotal = 0;
-						break;
 					case "position":
 						lastFen = uci.GetValue("fen", "moves");
 						lastMoves = uci.GetValue("moves", "fen");
+						if ((lastFen.Length == 0) && (lastMoves.Length < 5))
+							trySearch = true;
+						if (lastFen.Length > 0)
+							trySearch = false;
 						break;
 					case "go":
 						string move = String.Empty;
-						if ((emptyTotal == 0) && String.IsNullOrEmpty(lastFen))
+						if (trySearch)
 							move = book.GetMove(lastMoves);
 						if (!String.IsNullOrEmpty(move))
 							Console.WriteLine($"bestmove {move}");
 						else
 						{
-							emptyTotal++;
+							trySearch = false;
 							if (engineProcess == null)
 								Console.WriteLine("enginemove");
 							else
