@@ -16,8 +16,15 @@ namespace BookReaderAbk
 		public int ply;
 		public int nextMove;
 		public int nextSibling;
-
 		public long position;
+
+		public int GetValue()
+		{
+			int value=games+win-loose;
+			if(value <1)
+				value=1;
+			return value;
+		}
 
 		public void LoadFromBinaryReader(BinaryReader br)
 		{

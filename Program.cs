@@ -103,13 +103,13 @@ namespace BookReaderAbk
 							book.InfoMoves(uci.GetValue("moves"));
 							break;
 						case "getoption":
-							Console.WriteLine($"option name Book file type string default book{CBook.defExt}");
+							Console.WriteLine($"option name book_file type string default book{CBook.defExt}");
 							Console.WriteLine("optionend");
 							break;
 						case "setoption":
 							switch (uci.GetValue("name", "value").ToLower())
 							{
-								case "book file":
+								case "book_file":
 									SetBookFile(uci.GetValue("value"));
 									break;
 							}

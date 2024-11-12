@@ -207,8 +207,9 @@ namespace BookReaderAbk
 			int w = 0;
 			foreach (CRec r in rl)
 			{
-				w += r.games + 1;
-				if (CChess.rnd.Next(w) < r.games)
+				int v = r.GetValue();
+				w += v;
+				if (CChess.rnd.Next(w) < v)
 					move = r.GetUci();
 			}
 			return move;
