@@ -114,7 +114,10 @@ namespace BookReaderAbk
 									break;
 							}
 							break;
-					}
+                        default:
+                            Console.WriteLine($"Unknown command [{uci.tokens[1]}]");
+                            break;
+                    }
 				}
 				if ((uci.command != "go") && (engineProcess != null))
 					engineProcess.StandardInput.WriteLine(msg);
